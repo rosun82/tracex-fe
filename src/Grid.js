@@ -15,7 +15,7 @@ function Grid({
   setValue,
   readOnly,
 }) {
-  if (value === undefined || value === null) {
+  if (value == null) {
     value = [];
   }
 
@@ -30,7 +30,7 @@ function Grid({
   let minCol = 0;
   for (let r = 0; r < value.length; r++) {
     for (let c = 0; c < value[r].length; c++) {
-      if (value[r][c].readOnly) {
+      if (value[r][c] != null && value[r][c].readOnly) {
         minRow = r > minRow ? r : minRow;
         minCol = c > minCol ? c : minCol;
       }
@@ -43,7 +43,7 @@ function Grid({
       return;
     }
     let newValue = [...value];
-    newValue.push([Array(value[0].length).fill(emptyCell)]);
+    newValue.push(Array(value[0].length).fill(emptyCell));
     setValue(newValue);
   };
 

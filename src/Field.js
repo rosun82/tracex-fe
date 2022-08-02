@@ -36,9 +36,7 @@ function Field({
   };
 
   const handleChange = (e) => {
-    if (e.target.value !== value) {
-      setValue(e.target.value);
-    }
+    setValue(e.target.value);
   };
 
   if (type === "string") {

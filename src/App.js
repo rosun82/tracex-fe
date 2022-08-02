@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect } from "react";
 import './App.css';
 import Form from "./Form";
 import { typeCharMap } from "./Field";
-import { createEmpty } from "./Grid";
+import Grid, { createEmpty } from "./Grid";
 
 const fakeJson = {
   form: [
@@ -45,9 +45,8 @@ const fetchData = (jsonReq, cb) => {
     headers: { 'Content-Type': 'application/json' },
     body: jsonReq,
   };
-  fetch('https://reqres.in/api/posts', requestOptions)
+  fetch('/endpoint/form', requestOptions)
     .then(resp => resp.json())
-    .then(_ => fakeJson)
     .then(cb);
 };
 
@@ -68,6 +67,20 @@ function NavItem({ field }) {
   );
 }
 
+function Output({ output }) {
+  return (
+    <div className="card mb-3" style={{ width: "fit-content" }}>
+      <h6 className="card-header bg-success">
+        {output.label}
+      </h6>
+
+      <div className="card-body">
+        <Grid value={output.value} readOnly={true} />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [state, setState] = useState({ form: [] });
 
@@ -82,13 +95,16 @@ function App() {
     fetchData(JSON.stringify({}), setStateWithLog);
   }, []);
 
-  let values = {};
-  if (state.form) {
-    for (let i = 0; i < state.form.length; i++) {
-      const field = state.form[i];
-      values[field.name] = field.value;
+  const computeValues = (state) => {
+    let values = {};
+    if (state.form) {
+      for (let i = 0; i < state.form.length; i++) {
+        const field = state.form[i];
+        values[field.name] = field.value;
+      }
     }
-  }
+    return values;
+  };
 
   const setValues = (v) => {
     let newForm = [...state.form];
@@ -101,7 +117,9 @@ function App() {
   };
 
   const handleSubmit = (e) => {
-    fetchData(JSON.stringify(values), setStateWithLog);
+    const req = JSON.stringify(computeValues(state));
+    console.log("request: ", req);
+    fetchData(req, setStateWithLog);
   };
 
   // We take the state and generate a catalog and a main page.
@@ -110,6 +128,14 @@ function App() {
     for (let i = 0; i < state.form.length; i++) {
       const field = state.form[i];
       navs.push(<NavItem key={field.name} field={field} />);
+    }
+  }
+
+  let outputs = [];
+  if (state.outputs) {
+    for (let i = 0; i < state.outputs.length; i++) {
+      const output = state.outputs[i];
+      outputs.push(<Output output={output} key={output.label} />);
     }
   }
 
@@ -125,8 +151,12 @@ function App() {
             {navs}
           </div>
           <div className="col-lg-10">
-            <Form values={values} setValues={setValues} fields={state.form} />
+            <h1>Forms</h1>
+            <Form values={computeValues(state)} setValues={setValues} fields={state.form} />
             <div className="btn btn-primary" onClick={handleSubmit}>Submit</div>
+
+            <h1>Outputs</h1>
+            {outputs}
           </div>
         </div>
       </div>
